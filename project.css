@@ -1,0 +1,21 @@
+.well{
+  
+  border: 2px solid #cccccc;
+  border-radius: 50px;
+  margin: 50px;
+  padding-bottom: 60px;
+  padding-left: 100px;
+  align-items: center;
+  position: absolute;
+  
+}
+
+
+.btn{
+  float:right;
+ 
+}
+.box{
+	width: 100%;
+	height: 100%;
+}
