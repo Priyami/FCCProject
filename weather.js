@@ -1,58 +1,86 @@
-$(function() {  
-      if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(showPosition, showError);
-      } else { 
-        document.getElementById("error").innerHTML = "Geolocation is not supported by this browser.";
+$(document).ready(function() {
+
+  $("#search").hide();
+
+  $("#search_icon").click(function() {
+
+    $("#search").toggle("slow");
+    $("#search").focus();
+ //   $("#search_icon").hide();
+
+  });
+
+  $("#search").keypress(function(e) {
+
+    if (e.which == 13) {
+      var item = $("#search").val();
+      console.log("Key pressed");
+      $.ajax({
+        url: "https://en.wikipedia.org/w/api.php",
+        jsonp: "callback",
+        dataType: 'jsonp',
+        data: {
+          action: "query",
+          list: "search",
+          srsearch: item,
+          srinfo: "suggestion",
+          srlimit: "10",
+          format: "json"
+        },
+        xhrFields: {
+          withCredentials: true
+        },
+        success: displayResult
+      });
     }
+  });
 
+  function displayResult(data) {
 
-function showPosition(position) {
+    $('#results td').remove();
 
-    var crd = position.coords;
-            $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat="+crd.latitude+"&lon="+crd.longitude+"&appid=d5cf33490dffb5e8eb1bbb766241e0d6&units=metric", function(data){
-            var icon = data.weather[0].icon + ".png";
-            $("#weatherCelci").html("Temperature  " + Math.round(data.main.temp) + "&#8451" + "</br>City " + data.name + "," + data.sys.country + "</br>" + data.weather[0].main + "</br> <img src='http://openweathermap.org/img/w/"+icon +"' >" );
-            });
-    
-    $("#celci").click(function () {
-        if ($("#celci").is(":checked")) {
-            var crd = position.coords;
-            $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat="+crd.latitude+"&lon="+crd.longitude+"&appid=d5cf33490dffb5e8eb1bbb766241e0d6&units=metric", function(data){
-            var icon = data.weather[0].icon + ".png";
-            $("#weatherCelci").html("Temperature  " + Math.round(data.main.temp) + "&#8451" + "</br>City " + data.name + "," + data.sys.country + "</br>" + data.weather[0].main + "</br> <img src='http://openweathermap.org/img/w/"+icon +"' >" );
-            });
-        }
-       
+    $.each(data.query.search, function(index, value) {
+      var strTitle = value.title;
+      var strSnippet = value.snippet;
+
+      $('#results').append('<tr><td><a>' + strTitle + '</a></tr><<tr><td>' + strSnippet + '</td></tr><td><hr></td>');
+
     });
-    $("#faren").click(function() {
-        if($("#faren").is(":checked")) {
-             var crd = position.coords;
-            $.getJSON("http://api.openweathermap.org/data/2.5/weather?lat="+crd.latitude+"&lon="+crd.longitude+"&appid=d5cf33490dffb5e8eb1bbb766241e0d6&units=imperial", function(data){
-            var icon = data.weather[0].icon + ".png";
-            $("#weatherCelci").html("Temperature  " + Math.round(data.main.temp) + "&#8457" + "</br>City " + data.name + "," + data.sys.country + "</br>" + data.weather[0].main + "</br> <img src='http://openweathermap.org/img/w/"+icon +"' >" );
-            });
 
-        }
-    });
-    
   }
 
-function showError(error) {
-    switch(error.code) {
-        case error.PERMISSION_DENIED:
-             document.getElementById("error").innerHTML = "User denied the request for Geolocation."
-            break;
-        case error.POSITION_UNAVAILABLE:
-             document.getElementById("error").innerHTML = "Location information is unavailable."
-            break;
-        case error.TIMEOUT:
-             document.getElementById("error").innerHTML = "The request to get user location timed out."
-            break;
-        case error.UNKNOWN_ERROR:
-             document.getElementById("error").innerHTML = "An unknown error occurred."
-            break;
-    }
- }
+  $("div").on("click", "#results tr", function(e) {
+    var item = $("#search").val();
+    var heading = e.target.innerText;
 
+    $.ajax({
+      url: "https://en.wikipedia.org/w/api.php",
+      jsonp: "callback",
+      dataType: 'jsonp',
+      data: {
+        action: "query",
+        generator: "search",
+        gsrsearch: item,
+        prop: "info",
+        inprop: "url",
+        format: "json"
+      },
+      xhrFields: {
+        withCredentials: true
+      },
+      success: linkResult
+
+    });
+
+    function linkResult(data) {
+      $.each(data.query.pages, function(index, value) {
+
+        if (value.title === heading) {
+
+          window.open(value.canonicalurl, 'target_blank');
+        }
+      });
+    }
+  });
 
 });
