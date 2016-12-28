@@ -1,0 +1,20 @@
+#results{
+
+	
+	font-family: Arial;
+	
+
+
+}
+
+#results tr td{
+	table-layout: fixed;
+
+padding: 0 30px 0 0;
+border-bottom-style: ridge;
+font-style: italic;
+margin-left: 2em;
+        margin-right: 2em 
+
+
+}
